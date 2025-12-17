@@ -1,0 +1,46 @@
+============================================================
+EARTHQUAKE DATA EDA SUMMARY REPORT
+Generated: 2025-12-17 15:38:24
+============================================================
+
+1. DATASET OVERVIEW
+----------------------------------------
+   Total Records: 2,921,770
+   Total Columns: 28
+   Time Period: 2002 - 2025
+   Memory Usage: 2187.36 MB
+
+2. DATA QUALITY
+----------------------------------------
+   Columns with Missing Values: 11
+     - depthError: 7.2%
+     - rms: 3.9%
+     - magType: 1.6%
+     - Magnitude: 1.2%
+     - energy: 1.2%
+
+3. KEY STATISTICS
+----------------------------------------
+   Magnitude Range: -10.0 - 9.1
+   Mean Magnitude: 1.72
+   Depth Range: 0.0 - 735.8 km
+   Mean Depth: 24.8 km
+
+4. KEY CORRELATIONS
+----------------------------------------
+   Depth-Magnitude Pearson: 0.3501
+   Depth-Magnitude Spearman: 0.4404
+
+5. PCA INSIGHTS
+----------------------------------------
+   PC1 Variance: 29.7%
+   PC2 Variance: 13.8%
+   Top 3 PCs: 54.6% total variance
+
+6. CATEGORY DISTRIBUTION
+----------------------------------------
+   Small: 2,844,801 (97.4%)
+   Moderate: 39,097 (1.3%)
+   Great: 34,403 (1.2%)
+   Strong: 3,146 (0.1%)
+   Major: 323 (0.0%)
