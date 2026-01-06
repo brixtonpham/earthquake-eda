@@ -1,0 +1,32 @@
+% Introduction Section
+% Earthquake Prediction Problems - Data Science Report
+
+\subsection{Background}
+
+Earthquakes are among the most destructive natural disasters on Earth, causing significant loss of life, property damage, and economic disruption. Every year, approximately 500,000 detectable earthquakes occur worldwide, of which about 100,000 can be felt by humans, and roughly 100 cause damage \cite{usgs2024}. The unpredictable nature of seismic events makes earthquake prediction one of the most challenging problems in geophysics and data science.
+
+The advancement of seismic monitoring technology has led to the accumulation of vast amounts of earthquake data. The United States Geological Survey (USGS) maintains a comprehensive database containing millions of recorded seismic events spanning several decades. This wealth of data presents an unprecedented opportunity to apply modern data science and machine learning techniques to understand earthquake patterns and potentially improve prediction capabilities.
+
+\subsection{Motivation}
+
+The motivation for this study stems from several key factors. First, from a humanitarian perspective, earthquakes have caused over 750,000 deaths in the past two decades alone. Even marginal improvements in prediction accuracy could save thousands of lives through early warning systems and evacuation protocols. Second, economic considerations play a crucial role, as the economic cost of major earthquakes can exceed billions of dollars. Better understanding of seismic patterns can inform infrastructure planning, insurance risk assessment, and emergency preparedness.
+
+Furthermore, from a scientific advancement standpoint, the application of data science methods to seismological data can reveal patterns and relationships that traditional geophysical analysis might miss, contributing to the broader scientific understanding of tectonic processes. Finally, the availability of comprehensive, high-quality earthquake data from sources like USGS enables rigorous statistical analysis and machine learning model development.
+
+\subsection{Objectives}
+
+This project aims to achieve several important objectives. The first objective is to conduct comprehensive data analysis through thorough exploratory data analysis (EDA) on global earthquake data spanning 2002-2025 to understand the characteristics, distributions, and patterns of seismic events. The second objective focuses on pattern discovery, identifying temporal, spatial, and magnitude-related patterns that may provide insights into earthquake occurrence and behavior. The third objective involves feature engineering, developing meaningful features from raw seismic data that can be used for predictive modeling.
+
+The fourth objective focuses on building and evaluating machine learning models through three specific modeling tasks. Task 1 addresses magnitude prediction as a regression problem, using Random Forest Regressor to predict the exact magnitude value of earthquakes based on location and quality features, evaluated using RMSE and R2 Score metrics. Task 2 tackles depth category classification, employing K-Nearest Neighbors (KNN) and Decision Tree classifiers to categorize earthquakes into Shallow (less than 70 km), Intermediate (70-300 km), and Deep (greater than 300 km) categories, with particular emphasis on recall for shallow earthquakes due to their hazard significance. Task 3 applies unsupervised learning through K-Means and DBSCAN clustering algorithms to identify seismic hotspots and potential fault lines without predefined regional boundaries, evaluated using Silhouette Score.
+
+The final objective emphasizes practical applications, providing actionable insights that could contribute to earthquake early warning systems and disaster preparedness strategies.
+
+\subsection{Scope and Limitations}
+
+This study focuses on global earthquake data from 2002 to 2025, comprising approximately 2.9 million events recorded by the USGS seismic network. The methodology employs statistical and machine learning approaches to pattern analysis.
+
+It is important to acknowledge that earthquake prediction remains an extremely challenging problem. This study does not claim to solve the fundamental unpredictability of seismic events but rather aims to extract useful patterns and build probabilistic models that can assist in risk assessment and preparedness.
+
+\subsection{Report Structure}
+
+The remainder of this report is organized as follows. Section 2 provides the formal definition of the earthquake prediction problem and research questions. Section 3 reviews existing literature on earthquake prediction and data science approaches. Section 4 presents a detailed description of the USGS earthquake dataset used in this study. Section 5 contains comprehensive statistical analysis and visualization of earthquake data through exploratory data analysis. Section 6 discusses feature engineering and selection methodology. Finally, Section 7 covers machine learning model development and evaluation.

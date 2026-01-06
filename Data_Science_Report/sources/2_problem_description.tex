@@ -1,0 +1,52 @@
+% Problem Description Section
+% Earthquake Prediction Problems - Data Science Report
+
+\subsection{Problem Statement}
+
+Earthquake prediction is the attempt to forecast the time, location, and magnitude of future earthquakes with sufficient precision to enable effective countermeasures. Despite decades of research, reliable short-term earthquake prediction remains elusive. This project approaches the problem from a data science perspective, focusing on pattern recognition and statistical modeling rather than deterministic prediction.
+
+Formally, given historical earthquake data $D = \{e_1, e_2, ..., e_n\}$ where each event $e_i$ is characterized by features including timestamp $t_i$, location $(lat_i, lon_i)$, depth $d_i$, magnitude $m_i$, and various quality metrics, the objectives are threefold: to understand the statistical distributions and relationships among these features, to identify spatial-temporal patterns in earthquake occurrence, and to build predictive models for magnitude estimation and event classification.
+
+\subsection{Research Questions}
+
+This study addresses five main research questions. The first research question (RQ1) concerns distribution characteristics, investigating the statistical distributions of earthquake magnitude, depth, and energy, and examining whether these distributions follow known theoretical models such as the Gutenberg-Richter law \cite{gutenberg1944}.
+
+The second research question (RQ2) focuses on spatial patterns, exploring how earthquakes are distributed geographically, whether there are identifiable hotspots or clusters of seismic activity, and how earthquake characteristics vary by region.
+
+The third research question (RQ3) addresses temporal patterns, examining whether there are seasonal or cyclical patterns in earthquake occurrence, how seismic activity has changed over the study period from 2002 to 2025, and whether there are detectable precursor patterns before major events.
+
+The fourth research question (RQ4) investigates feature relationships, analyzing the relationship between earthquake depth and magnitude, examining how quality metrics such as station count, azimuthal gap, and RMS error relate to event characteristics, and determining which features are most important for predictive modeling.
+
+The fifth research question (RQ5) concerns predictive modeling, evaluating whether machine learning models can effectively classify earthquakes by magnitude category and determining what level of prediction accuracy is achievable with available features.
+
+\subsection{Challenges}
+
+The earthquake prediction problem presents several significant challenges. The first challenge is inherent unpredictability, as earthquake nucleation involves chaotic processes that are fundamentally difficult to predict beyond statistical probabilities \cite{rundle2003}.
+
+The second challenge involves class imbalance. Major earthquakes with magnitude greater than or equal to 7.0 constitute only 0.01\% of all events, creating severe class imbalance for classification tasks. This imbalance requires careful consideration in model design and evaluation.
+
+The third challenge is spatial heterogeneity. Earthquake behavior varies significantly by tectonic setting, including differences between subduction zones, transform faults, and intraplate regions. This variation means that models trained on one region may not generalize well to others.
+
+The fourth challenge concerns data quality variation. Detection capabilities and measurement accuracy vary by location and time period, introducing potential biases in the dataset that must be accounted for during analysis.
+
+The fifth challenge is temporal non-stationarity. Seismic patterns may change over time due to stress evolution and fault interactions, making it difficult to assume that historical patterns will continue into the future.
+
+The sixth challenge relates to feature limitations. Available features may not capture the underlying physical processes driving earthquake occurrence, limiting the predictive power of any model built on these features alone.
+
+\subsection{Approach Overview}
+
+The approach to addressing these challenges consists of three main phases. Phase 1 involves Exploratory Data Analysis, including comprehensive statistical analysis of earthquake characteristics, data quality assessment and preprocessing, visualization of spatial, temporal, and magnitude distributions, and correlation analysis and dimensionality reduction using Principal Component Analysis (PCA).
+
+Phase 2 focuses on Feature Engineering. This phase includes extraction of temporal features such as year, month, day, and hour patterns. It also encompasses spatial feature engineering including regional classification and distance metrics, derived features such as energy calculated from magnitude and depth categories, and feature selection based on importance and correlation analysis.
+
+Phase 3 addresses Predictive Modeling. This final phase involves classification models for magnitude category prediction, regression models for magnitude estimation, model evaluation using appropriate metrics while handling class imbalance, and comparison of multiple algorithms with hyperparameter optimization.
+
+\subsection{Success Criteria}
+
+The success of this project will be evaluated against several criteria. The first criterion is analytical depth, demonstrated through comprehensive understanding of earthquake data characteristics and patterns through rigorous EDA. The second criterion is statistical validity, requiring use of appropriate statistical methods with proper validation and uncertainty quantification.
+
+The third criterion is model performance, requiring achievement of reasonable predictive accuracy with appropriate benchmarking against baseline methods. The fourth criterion is practical insights, requiring generation of actionable insights that could inform earthquake preparedness and risk assessment. The fifth criterion is scientific rigor, requiring honest assessment of limitations and avoidance of overclaiming predictive capabilities.
+
+\subsection{Expected Contributions}
+
+This project is expected to contribute a comprehensive analysis of 23 years of global earthquake data, visualization tools for understanding seismic patterns, feature importance analysis for earthquake prediction tasks, baseline machine learning models with documented performance metrics, and insights into the applicability of data science methods to seismological problems.

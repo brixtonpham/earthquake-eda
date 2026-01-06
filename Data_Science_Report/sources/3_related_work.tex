@@ -1,0 +1,68 @@
+% Related Work Section
+% Earthquake Prediction Problems - Data Science Report
+
+This section reviews existing literature on earthquake prediction, covering traditional seismological approaches, statistical models, and modern machine learning methods.
+
+\subsection{Traditional Seismological Approaches}
+
+Earthquake prediction has been a central challenge in geophysics for over a century. Traditional approaches have focused on identifying physical precursors that might signal an impending earthquake. These precursors include changes in seismic wave velocities, ground deformation measured by GPS networks, variations in groundwater levels, electromagnetic anomalies, and changes in radon gas emissions.
+
+Despite extensive research, reliable short-term earthquake prediction based on physical precursors remains elusive. The 1975 Haicheng earthquake in China represents one of the few cases where successful evacuation was ordered based on precursor observations, saving thousands of lives. However, this success has not been consistently replicated, and the scientific community generally agrees that deterministic earthquake prediction is not currently achievable \cite{rundle2003}.
+
+The fundamental challenge lies in the complex, nonlinear nature of earthquake rupture processes. Earthquakes result from the sudden release of accumulated stress along fault systems, but the precise timing and location of rupture initiation depend on small-scale heterogeneities that are impossible to observe directly \cite{bouchon2013}.
+
+\subsection{Statistical Seismology}
+
+Given the limitations of deterministic prediction, statistical approaches have become the dominant paradigm in earthquake science. These methods aim to characterize the probabilistic occurrence of earthquakes rather than predict specific events.
+
+The Gutenberg-Richter law, established in 1944, describes the relationship between earthquake magnitude and frequency \cite{gutenberg1944}. This empirical law states that the logarithm of the number of earthquakes decreases linearly with magnitude, expressed as $\log_{10}N = a - bM$, where N is the number of earthquakes with magnitude greater than or equal to M, and a and b are constants. The b-value is typically close to 1.0, meaning that for each unit increase in magnitude, earthquakes become approximately 10 times less frequent. This relationship has been confirmed across diverse tectonic settings and forms the foundation for seismic hazard assessment.
+
+The Epidemic-Type Aftershock Sequence (ETAS) model, introduced by Ogata in 1988, provides a statistical framework for modeling earthquake clustering \cite{ogata1988}. This model treats earthquake occurrence as a point process where each earthquake can trigger subsequent events according to empirical scaling laws. The ETAS model captures the observation that large earthquakes are followed by sequences of aftershocks that decay in frequency according to Omori's law. This model has been widely used for aftershock forecasting and has demonstrated skill in predicting the rate of seismicity following major earthquakes.
+
+Reasenberg's clustering algorithm provides another approach to identifying related earthquakes and distinguishing between independent mainshocks and dependent aftershocks \cite{reasenberg1985}. Understanding earthquake clustering is essential for both hazard assessment and for preparing datasets for machine learning, as treating aftershocks independently can bias model training.
+
+\subsection{Machine Learning Approaches}
+
+The application of machine learning to earthquake science has grown substantially in recent years, driven by improvements in computational power and the availability of large seismic datasets. Machine learning methods have been applied to several earthquake-related tasks, including earthquake detection, phase picking, magnitude estimation, and aftershock forecasting.
+
+Early machine learning applications focused on earthquake detection and phase arrival picking. Traditional methods rely on amplitude thresholds and characteristic functions to identify seismic signals, but machine learning classifiers can learn more complex patterns that distinguish earthquakes from noise. Support Vector Machines, Random Forests, and Gradient Boosting methods have all been applied to this task with varying degrees of success.
+
+For magnitude estimation, regression models have been trained to predict earthquake magnitude from waveform features. Features typically include amplitude measures, frequency content, and duration. While these models can provide rapid magnitude estimates useful for early warning systems, their accuracy is limited by the inherent variability in earthquake source processes and path effects.
+
+Classification approaches have been applied to categorize earthquakes by magnitude class, depth category, or tectonic setting. These models face significant challenges due to severe class imbalance, as major earthquakes constitute only a tiny fraction of all events. Techniques such as oversampling, undersampling, and cost-sensitive learning have been employed to address this imbalance.
+
+\subsection{Deep Learning Methods}
+
+Deep learning has emerged as a powerful tool for earthquake science, particularly for tasks involving raw waveform data. Convolutional Neural Networks (CNNs) can automatically learn hierarchical features from seismograms, eliminating the need for manual feature engineering.
+
+DeVries et al. demonstrated that deep learning could predict the spatial distribution of aftershocks more accurately than traditional Coulomb stress models \cite{devries2018}. Their neural network, trained on a global dataset of mainshock-aftershock sequences, learned to identify stress patterns associated with aftershock occurrence. This work represented a significant advance, showing that data-driven approaches could outperform physics-based models for certain prediction tasks.
+
+The Earthquake Transformer, developed by Mousavi et al., represents the state-of-the-art in deep learning for seismic signal processing \cite{mousavi2020}. This attention-based architecture simultaneously detects earthquakes and picks P and S wave arrivals from continuous waveform data. The model achieves high accuracy across diverse datasets and has been widely adopted by the seismological community.
+
+Recurrent Neural Networks (RNNs) and Long Short-Term Memory (LSTM) networks have been applied to model temporal sequences of earthquakes. These architectures can capture long-range dependencies in seismic catalogs and have shown promise for forecasting earthquake rates at various time scales.
+
+Graph Neural Networks represent an emerging approach that can model the spatial relationships between earthquakes and faults. By representing fault networks as graphs, these models can learn how stress transfers between different fault segments and potentially improve forecasts of earthquake cascades.
+
+\subsection{Probabilistic Seismic Hazard Assessment}
+
+While precise prediction remains out of reach, Probabilistic Seismic Hazard Assessment (PSHA) provides a framework for quantifying earthquake risk over longer time scales. PSHA integrates information about fault locations, slip rates, magnitude-frequency distributions, and ground motion models to estimate the probability of exceeding specified ground shaking levels at a given location.
+
+PSHA has become the standard approach for seismic design codes and insurance risk assessment. Machine learning methods have been incorporated into various components of PSHA, including ground motion prediction equations and site response estimation.
+
+\subsection{Challenges and Research Gaps}
+
+Despite significant progress, several challenges remain in applying data science to earthquake prediction. The first major challenge is the rarity of large earthquakes. Major events with magnitude 7.0 or greater occur only a few dozen times per year globally, providing limited training data for machine learning models. This class imbalance makes it difficult to build models that reliably identify precursors to large earthquakes.
+
+The second challenge is the lack of known reliable precursors. Unlike weather prediction, where atmospheric variables provide clear signals of future conditions, no consistent physical precursors to earthquakes have been identified. This limits the potential for feature engineering in machine learning approaches.
+
+The third challenge is spatial and temporal non-stationarity. Earthquake occurrence patterns vary significantly by tectonic setting and may change over time as stress accumulates and releases. Models trained on historical data may not generalize well to future conditions or different regions.
+
+The fourth challenge involves evaluation difficulties. The rarity of large earthquakes makes it difficult to validate prediction models. A model might appear successful during a training period but fail to predict events in the test period simply due to the random nature of earthquake occurrence.
+
+\subsection{Positioning of This Study}
+
+This study contributes to the growing body of work applying data science methods to earthquake analysis. Rather than attempting deterministic prediction, the focus is on comprehensive exploratory data analysis to understand earthquake characteristics and patterns, followed by probabilistic modeling of magnitude categories.
+
+The approach builds on established statistical foundations, particularly the Gutenberg-Richter magnitude-frequency relationship, while applying modern machine learning techniques for pattern recognition and classification. By analyzing a large dataset spanning 23 years and nearly 3 million events, the study provides statistically robust characterizations of earthquake behavior that can inform both scientific understanding and practical hazard assessment.
+
+The study acknowledges the fundamental limitations of earthquake prediction while demonstrating the value of data science methods for extracting insights from seismic catalogs. The findings complement rather than replace physics-based seismological research, contributing to an integrated approach to earthquake science.

@@ -1,0 +1,122 @@
+% Feature Selection Section
+% Earthquake Prediction Problems - Data Science Report
+
+This section describes the feature engineering process and selection methodology used to prepare the dataset for predictive modeling. The goal is to identify the most informative features while reducing dimensionality and avoiding multicollinearity.
+
+\subsection{Feature Engineering}
+
+Feature engineering transforms raw data into meaningful representations that improve model performance. Based on the exploratory data analysis findings, several categories of features were engineered from the original dataset.
+
+\subsubsection{Temporal Features}
+
+Temporal features were extracted from the timestamp variable to capture patterns in earthquake occurrence across different time scales. The year feature enables analysis of long-term trends in seismicity. The month feature captures potential seasonal patterns, though the EDA revealed no strong seasonality in earthquake occurrence. The day of month and day of year features provide finer temporal resolution.
+
+The hour feature captures daily patterns, which may reflect both genuine geophysical processes and detection artifacts related to human activity cycles. The day of week feature revealed slight decreases in recorded events during weekends, likely due to reduced industrial and mining activity rather than actual changes in natural seismicity.
+
+These temporal features were encoded as numerical values to preserve their ordinal nature. For the day of week and month features, cyclical encoding using sine and cosine transformations was considered to capture the circular nature of these variables, where December is adjacent to January and Sunday is adjacent to Monday.
+
+\subsubsection{Spatial Features}
+
+The latitude and longitude variables provide precise spatial coordinates for each earthquake. These features are essential for geospatial analysis and can capture regional variations in earthquake characteristics. However, raw coordinates may not be optimal for machine learning models due to the spherical geometry of the Earth.
+
+A regional classification feature was derived to categorize earthquakes by broad geographic region. The classification scheme divided events into Americas, Europe and Africa, and Asia-Pacific regions based on longitude ranges. This categorical feature enables grouped analysis and can capture systematic differences in earthquake behavior across tectonic settings.
+
+Distance-based features could be computed relative to known fault lines or plate boundaries, though this requires additional geospatial data beyond the scope of the current dataset. Such features would likely improve model performance by explicitly encoding proximity to seismically active zones.
+
+\subsubsection{Seismic Features}
+
+The primary seismic features are depth and magnitude, which characterize the fundamental properties of each earthquake. Depth represents the vertical distance to the earthquake hypocenter and ranges from surface events to deep-focus earthquakes exceeding 700 km depth.
+
+The energy feature was calculated from magnitude using the standard seismological formula $\log_{10}(E) = 1.5M + 4.8$, where E is energy in Joules. This derived feature represents the actual physical energy released and may provide additional predictive power beyond magnitude alone due to its exponential scaling.
+
+Categorical versions of depth and magnitude were created to facilitate classification tasks. The magnitude category feature classifies events as Small, Moderate, Great, Strong, or Major based on standard thresholds. The depth category feature classifies events as Shallow, Intermediate, or Deep following seismological conventions.
+
+\subsubsection{Quality Features}
+
+Quality indicator features provide information about the reliability of earthquake measurements and may also correlate with earthquake characteristics. The number of stations (nst) used to locate an earthquake typically increases with magnitude, as larger events produce signals detectable at greater distances.
+
+The azimuthal gap measures the largest angular separation between adjacent recording stations and inversely correlates with location accuracy. Events with smaller gaps have better-constrained locations. The root-mean-square residual (rms) reflects the quality of the location solution.
+
+Horizontal and depth error estimates quantify uncertainty in the earthquake location. These features may be useful for filtering unreliable events or for uncertainty-aware modeling approaches.
+
+\subsection{Feature Selection Methodology}
+
+Feature selection aims to identify the most relevant features for predictive modeling while eliminating redundant or uninformative variables. Multiple selection methods were applied to ensure robust feature identification.
+
+\subsubsection{Correlation-Based Selection}
+
+The correlation analysis from the EDA revealed several highly correlated feature pairs that could cause multicollinearity issues in predictive models. Magnitude and energy exhibited near-perfect correlation at 0.99, which is expected given that energy is calculated directly from magnitude. Including both features would provide redundant information and potentially destabilize model coefficients.
+
+Magnitude and station count (nst) showed strong positive correlation at 0.71, reflecting the physical relationship where larger earthquakes are detected by more stations. The azimuthal gap and station count exhibited moderate negative correlation at -0.53, as events recorded by more stations typically have smaller gaps.
+
+Based on correlation analysis, a threshold of 0.85 was applied to identify highly correlated pairs. For each such pair, the feature with stronger theoretical relevance to the prediction task was retained. Energy was removed in favor of magnitude, as magnitude is the standard measure in seismology and more directly interpretable.
+
+\subsubsection{Variance-Based Selection}
+
+Features with very low variance provide little discriminative information and were candidates for removal. The variance threshold method was applied to identify near-constant features. All features in the dataset exhibited sufficient variance to be retained, indicating that no features were trivially uninformative.
+
+However, the distribution analysis revealed that some features have highly skewed distributions. The magnitude distribution, for example, is heavily concentrated on small values with a long right tail. Log transformations were applied to such features to reduce skewness and improve model performance.
+
+\subsubsection{Principal Component Analysis}
+
+PCA results from the EDA informed feature selection by revealing the underlying structure of the data. The first principal component, explaining 29.7\% of variance, loaded heavily on magnitude-related features including magnitude, energy, and station count. This suggests these features capture a common underlying factor related to earthquake size.
+
+The second principal component, explaining 13.8\% of variance, captured location quality metrics including azimuthal gap and error estimates. The third component primarily reflected temporal features. The fact that three components explain only 54.6\% of total variance indicates high dimensionality with multiple independent factors.
+
+PCA loadings guided feature selection by identifying which original features contribute most to each component. Features with high loadings on the first few components were prioritized for retention, as they capture the most variance in the data.
+
+\subsubsection{Feature Importance from Tree-Based Models}
+
+Random Forest feature importance provides a model-based approach to feature selection. A preliminary Random Forest classifier was trained on the magnitude category prediction task, and feature importance scores were extracted based on the mean decrease in impurity.
+
+The most important features identified by this method were depth, latitude, longitude, station count, and hour. Depth emerged as the most predictive feature for magnitude category, consistent with the moderate positive correlation between depth and magnitude observed in the EDA.
+
+Spatial coordinates (latitude and longitude) ranked highly, reflecting the strong geographic patterns in earthquake magnitude distribution. Station count importance likely reflects its correlation with magnitude rather than independent predictive power.
+
+\subsection{Handling Class Imbalance}
+
+The severe class imbalance in magnitude categories presents a significant challenge for feature selection and modeling. With 97.4\% of events classified as Small and only 0.01\% as Major, standard feature selection methods may be biased toward features that predict the majority class.
+
+To address this issue, stratified sampling was employed during feature selection to ensure that minority classes were adequately represented. Feature importance was calculated separately for each class to identify features that distinguish between specific magnitude categories rather than simply predicting the majority class.
+
+Additionally, the Synthetic Minority Over-sampling Technique (SMOTE) was considered for generating synthetic examples of minority classes during model training. However, care must be taken when applying SMOTE to geospatial data, as synthetic examples may not represent physically plausible earthquake locations.
+
+\subsection{Final Feature Set}
+
+Based on the comprehensive feature selection process, the final feature set for predictive modeling includes the following variables.
+
+\begin{table}[H]
+\centering
+\caption{Final selected features for predictive modeling}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Feature} & \textbf{Type} & \textbf{Description} \\
+\hline
+Depth & Continuous & Hypocenter depth in kilometers \\
+Latitude & Continuous & Epicenter latitude in degrees \\
+Longitude & Continuous & Epicenter longitude in degrees \\
+nst & Continuous & Number of recording stations \\
+gap & Continuous & Azimuthal gap in degrees \\
+rms & Continuous & RMS travel time residual \\
+year & Discrete & Year of occurrence \\
+month & Discrete & Month of occurrence \\
+hour & Discrete & Hour of occurrence (UTC) \\
+dayofweek & Discrete & Day of week (0-6) \\
+depth\_category & Categorical & Shallow/Intermediate/Deep \\
+\hline
+\end{tabular}
+\end{table}
+
+The magnitude and energy features were excluded from the input feature set as they are directly related to the prediction target. Including these features would constitute data leakage and produce artificially high model performance.
+
+Quality error features (horizontalError, depthError) were excluded due to their relatively high missing rates and limited predictive contribution. The magType and net categorical features were excluded to reduce dimensionality, though they could be included in future work using appropriate encoding schemes.
+
+\subsection{Feature Preprocessing}
+
+Prior to model training, numerical features were standardized using z-score normalization to ensure all features have comparable scales. This preprocessing step is essential for algorithms sensitive to feature magnitudes, such as logistic regression and support vector machines.
+
+Categorical features were encoded using one-hot encoding for nominal variables and ordinal encoding for ordered categories. The depth category feature was ordinal encoded as Shallow=0, Intermediate=1, Deep=2 to preserve the natural ordering.
+
+Missing values in the selected features were handled using median imputation for numerical variables. This approach is robust to outliers and preserves the overall distribution shape. For categorical variables, missing values were treated as a separate category.
+
+The final preprocessed dataset was split into training (70\%), validation (15\%), and test (15\%) sets using stratified sampling to maintain class proportions across all splits. This split ensures that model performance can be evaluated on unseen data while providing a validation set for hyperparameter tuning.

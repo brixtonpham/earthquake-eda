@@ -374,29 +374,33 @@ def plot_magnitude_distribution(df):
     # Create figure with 3 subplots
     fig, axes = plt.subplots(1, 3, figsize=FIGSIZE_LARGE)
 
-    # Subplot 1: Histogram with KDE
+    # Subplot 1: Histogram with KDE - Focus on main distribution range
     ax1 = axes[0]
-    ax1.hist(mag_data, bins=30, density=True, alpha=0.7, color='steelblue', edgecolor='black')
-    mag_data.plot(kind='kde', ax=ax1, color='red', linewidth=2, label='KDE')
+    # Filter to focus on main distribution (exclude extreme outliers for visualization)
+    mag_main = mag_data[(mag_data >= -2) & (mag_data <= 8)]
+    ax1.hist(mag_main, bins=50, density=True, alpha=0.7, color='steelblue', edgecolor='black')
+    mag_main.plot(kind='kde', ax=ax1, color='red', linewidth=2, label='KDE')
     ax1.axvline(stats_dict['mean'], color='green', linestyle='--', linewidth=2, label=f"Mean: {stats_dict['mean']:.2f}")
     ax1.axvline(stats_dict['median'], color='orange', linestyle='--', linewidth=2, label=f"Median: {stats_dict['median']:.2f}")
-    ax1.set_xlabel('Magnitude')
-    ax1.set_ylabel('Density')
+    ax1.set_xlabel('Magnitude', fontsize=11)
+    ax1.set_ylabel('Density', fontsize=11)
+    ax1.set_xlim(-2, 8)  # Focus on main distribution range
     ax1.set_title('Magnitude Distribution (Histogram + KDE)', fontsize=12, fontweight='bold')
     ax1.legend(fontsize=9)
 
-    # Subplot 2: Boxplot
+    # Subplot 2: Boxplot - Focus on main range
     ax2 = axes[1]
-    bp = ax2.boxplot(mag_data, vert=True, patch_artist=True)
+    bp = ax2.boxplot(mag_main, vert=True, patch_artist=True, showfliers=False)  # Hide outliers for clearer view
     bp['boxes'][0].set_facecolor('lightblue')
-    ax2.set_ylabel('Magnitude')
+    ax2.set_ylabel('Magnitude', fontsize=11)
+    ax2.set_ylim(-2, 8)  # Consistent with histogram
     ax2.set_title('Magnitude Boxplot', fontsize=12, fontweight='bold')
 
     # Add quartile annotations
     quartiles = mag_data.quantile([0.25, 0.5, 0.75])
-    ax2.annotate(f"Q1: {quartiles[0.25]:.2f}", xy=(1.1, quartiles[0.25]), fontsize=9)
-    ax2.annotate(f"Q2: {quartiles[0.5]:.2f}", xy=(1.1, quartiles[0.5]), fontsize=9)
-    ax2.annotate(f"Q3: {quartiles[0.75]:.2f}", xy=(1.1, quartiles[0.75]), fontsize=9)
+    ax2.annotate(f"Q1: {quartiles[0.25]:.2f}", xy=(1.15, quartiles[0.25]), fontsize=10, fontweight='bold')
+    ax2.annotate(f"Q2: {quartiles[0.5]:.2f}", xy=(1.15, quartiles[0.5]), fontsize=10, fontweight='bold')
+    ax2.annotate(f"Q3: {quartiles[0.75]:.2f}", xy=(1.15, quartiles[0.75]), fontsize=10, fontweight='bold')
 
     # Subplot 3: Category bar chart
     ax3 = axes[2]
@@ -428,7 +432,7 @@ def plot_magnitude_distribution(df):
 
     plt.suptitle('★ Magnitude Distribution Analysis', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}magnitude_distribution.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}magnitude_distribution.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}magnitude_distribution.png")
@@ -503,7 +507,7 @@ def plot_depth_distribution(df):
 
     plt.suptitle('Depth Distribution Analysis', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}depth_distribution.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}depth_distribution.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}depth_distribution.png")
@@ -693,56 +697,66 @@ def plot_depth_vs_magnitude(df):
     # Create figure with 2 subplots
     fig, axes = plt.subplots(1, 2, figsize=FIGSIZE_LARGE)
 
-    # Subplot 1: Scatter plot colored by magnitude category
+    # Subplot 1: Scatter plot with STRATIFIED sampling to show all categories clearly
     ax1 = axes[0]
 
-    # Sample data if too large (for better visualization)
-    if len(df_clean) > 50000:
-        df_sample = df_clean.sample(n=50000, random_state=42)
-    else:
-        df_sample = df_clean
+    # Stratified sampling: equal representation of each category
+    cat_order = ['Small', 'Moderate', 'Strong', 'Major']
+    colors_map = {'Small': '#90EE90', 'Moderate': '#FFD700', 'Strong': '#FFA500', 'Major': '#FF4500'}
 
-    # Create color mapping for categories
-    cat_order = ['Micro', 'Minor', 'Small', 'Light', 'Moderate', 'Strong', 'Major', 'Great']
-    colors = plt.cm.RdYlGn_r(np.linspace(0.1, 0.9, len(cat_order)))
-    color_map = {cat: colors[i] for i, cat in enumerate(cat_order)}
+    # Sample fewer Small earthquakes, more of rare categories
+    sample_sizes = {'Small': 5000, 'Moderate': 5000, 'Strong': 5000, 'Major': 500}
 
-    for cat in cat_order:
-        if cat in df_sample['magnitude_category'].unique():
-            subset = df_sample[df_sample['magnitude_category'] == cat]
-            ax1.scatter(subset['Depth'], subset['Magnitude'],
-                       alpha=0.5, s=10, label=cat, color=color_map.get(cat, 'gray'))
+    for cat in reversed(cat_order):  # Plot Small first (background), Major last (foreground)
+        if cat in df_clean['magnitude_category'].unique():
+            subset = df_clean[df_clean['magnitude_category'] == cat]
+            n_sample = min(sample_sizes.get(cat, 5000), len(subset))
+            if n_sample > 0:
+                subset_sample = subset.sample(n=n_sample, random_state=42)
+                size = 15 if cat in ['Strong', 'Major'] else 8
+                alpha = 0.7 if cat in ['Strong', 'Major'] else 0.4
+                ax1.scatter(subset_sample['Depth'], subset_sample['Magnitude'],
+                           alpha=alpha, s=size, label=f'{cat} (n={len(subset):,})',
+                           color=colors_map.get(cat, 'gray'), edgecolors='none')
 
     ax1.set_xlabel('Depth (km)', fontsize=12)
     ax1.set_ylabel('Magnitude', fontsize=12)
-    ax1.set_title('Depth vs Magnitude (by Category)', fontsize=12, fontweight='bold')
-    ax1.legend(title='Category', bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=8)
+    ax1.set_xlim(0, 750)
+    ax1.set_ylim(-1, 10)
+    ax1.set_title('Depth vs Magnitude (Stratified Sample)', fontsize=12, fontweight='bold')
+    ax1.legend(title='Category', loc='upper left', fontsize=9)
+    ax1.grid(True, alpha=0.3)
 
     # Add correlation text
     corr_text = f"Pearson r = {pearson_corr:.4f}\nSpearman ρ = {spearman_corr:.4f}"
-    ax1.text(0.05, 0.95, corr_text, transform=ax1.transAxes, fontsize=10,
-            verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    ax1.text(0.65, 0.15, corr_text, transform=ax1.transAxes, fontsize=11,
+            verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.9))
 
-    # Subplot 2: Hexbin for density visualization
+    # Subplot 2: Hexbin for density visualization with LOG scale
     ax2 = axes[1]
-    hb = ax2.hexbin(df_clean['Depth'], df_clean['Magnitude'],
-                    gridsize=50, cmap='YlOrRd', mincnt=1)
+    # Filter to focus range for hexbin
+    df_hexbin = df_clean[(df_clean['Magnitude'] >= -1) & (df_clean['Magnitude'] <= 10)]
+    hb = ax2.hexbin(df_hexbin['Depth'], df_hexbin['Magnitude'],
+                    gridsize=60, cmap='YlOrRd', mincnt=1, bins='log')
     ax2.set_xlabel('Depth (km)', fontsize=12)
     ax2.set_ylabel('Magnitude', fontsize=12)
-    ax2.set_title('Depth vs Magnitude (Density)', fontsize=12, fontweight='bold')
+    ax2.set_xlim(0, 750)
+    ax2.set_ylim(-1, 10)
+    ax2.set_title('Depth vs Magnitude (Log Density)', fontsize=12, fontweight='bold')
     cb = plt.colorbar(hb, ax=ax2)
-    cb.set_label('Count')
+    cb.set_label('Log(Count)')
+    ax2.grid(True, alpha=0.3)
 
     # Add regression line
     slope, intercept, r_value, p_value, std_err = stats.linregress(df_clean['Depth'], df_clean['Magnitude'])
-    x_line = np.array([df_clean['Depth'].min(), df_clean['Depth'].max()])
+    x_line = np.array([0, 700])
     y_line = slope * x_line + intercept
     ax2.plot(x_line, y_line, 'b--', linewidth=2, label=f'Regression: y={slope:.4f}x+{intercept:.2f}')
-    ax2.legend(fontsize=9)
+    ax2.legend(fontsize=9, loc='upper left')
 
     plt.suptitle('★ Depth vs Magnitude Analysis', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}depth_vs_magnitude_scatter.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}depth_vs_magnitude_scatter.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}depth_vs_magnitude_scatter.png")
@@ -826,7 +840,7 @@ def analyze_temporal_patterns(df):
 
     plt.suptitle('Temporal Pattern Analysis', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}temporal_patterns.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}temporal_patterns.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}temporal_patterns.png")
@@ -974,7 +988,7 @@ def create_correlation_matrix(df):
     ax.set_title('★ Correlation Matrix - Numerical Variables', fontsize=16, fontweight='bold', pad=20)
 
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}correlation_matrix.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}correlation_matrix.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}correlation_matrix.png")
@@ -1153,7 +1167,7 @@ def perform_pca_analysis(df):
 
     plt.suptitle('★ PCA Analysis', fontsize=16, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}pca_analysis.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}pca_analysis.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}pca_analysis.png")
@@ -1258,7 +1272,7 @@ def perform_grouped_analysis(df):
 
 def plot_earthquake_locations(df):
     """
-    Create scatter plot of earthquake locations.
+    Create scatter plot of earthquake locations with improved visualization.
 
     Parameters:
         df (pd.DataFrame): Input DataFrame
@@ -1268,46 +1282,92 @@ def plot_earthquake_locations(df):
     """
     print("\nCreating Earthquake Location Map...")
 
-    # Sample for visualization
-    if len(df) > 50000:
-        df_sample = df.sample(n=50000, random_state=42)
+    # Sample for visualization - use stratified sampling to include rare events
+    if len(df) > 100000:
+        # Stratified sample to ensure all magnitude categories are represented
+        if 'magnitude_category' in df.columns:
+            df_sample = df.groupby('magnitude_category', group_keys=False).apply(
+                lambda x: x.sample(min(len(x), 15000), random_state=42)
+            )
+        else:
+            df_sample = df.sample(n=100000, random_state=42)
     else:
         df_sample = df
 
-    fig, ax = plt.subplots(figsize=FIGSIZE_LARGE)
+    fig, axes = plt.subplots(1, 2, figsize=(18, 8))
 
-    # Color and size by magnitude
+    # Subplot 1: Scatter plot by magnitude category
+    ax1 = axes[0]
+
     if 'magnitude_category' in df_sample.columns:
         cat_order = ['Micro', 'Minor', 'Small', 'Light', 'Moderate', 'Strong', 'Major', 'Great']
         colors = plt.cm.RdYlGn_r(np.linspace(0.1, 0.9, len(cat_order)))
         color_map = {cat: colors[i] for i, cat in enumerate(cat_order)}
 
-        for cat in cat_order:
+        # Plot in reverse order so larger earthquakes appear on top
+        for cat in reversed(cat_order):
             subset = df_sample[df_sample['magnitude_category'] == cat]
             if len(subset) > 0:
                 # Scale point size by magnitude category
-                size_scale = (cat_order.index(cat) + 1) * 2
-                ax.scatter(subset['Longitude'], subset['Latitude'],
-                          alpha=0.4, s=size_scale, label=cat,
-                          color=color_map.get(cat, 'gray'))
+                size_scale = (cat_order.index(cat) + 1) ** 1.5 * 3
+                alpha_scale = 0.3 + (cat_order.index(cat) / len(cat_order)) * 0.5
+                ax1.scatter(subset['Longitude'], subset['Latitude'],
+                           alpha=alpha_scale, s=size_scale, label=cat,
+                           color=color_map.get(cat, 'gray'), edgecolors='none')
 
-        ax.legend(title='Magnitude', bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=9)
+        ax1.legend(title='Magnitude Category', bbox_to_anchor=(1.02, 1),
+                   loc='upper left', fontsize=9, markerscale=2)
     else:
-        scatter = ax.scatter(df_sample['Longitude'], df_sample['Latitude'],
-                            c=df_sample['Magnitude'], cmap='YlOrRd',
-                            alpha=0.4, s=5)
-        plt.colorbar(scatter, ax=ax, label='Magnitude')
+        scatter = ax1.scatter(df_sample['Longitude'], df_sample['Latitude'],
+                             c=df_sample['Magnitude'], cmap='YlOrRd',
+                             alpha=0.4, s=5)
+        plt.colorbar(scatter, ax=ax1, label='Magnitude')
 
-    ax.set_xlabel('Longitude', fontsize=12)
-    ax.set_ylabel('Latitude', fontsize=12)
-    ax.set_title('Global Earthquake Distribution', fontsize=14, fontweight='bold')
+    ax1.set_xlabel('Longitude', fontsize=12)
+    ax1.set_ylabel('Latitude', fontsize=12)
+    ax1.set_title('Global Earthquake Distribution by Magnitude', fontsize=13, fontweight='bold')
+    ax1.set_xlim(-180, 180)
+    ax1.set_ylim(-90, 90)
+    ax1.axhline(y=0, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax1.axvline(x=0, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax1.grid(True, alpha=0.3, linestyle=':')
 
-    # Add reference lines for equator and prime meridian
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-    ax.axvline(x=0, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+    # Subplot 2: Focus on significant earthquakes (M >= 4.0)
+    ax2 = axes[1]
 
+    df_significant = df[df['Magnitude'] >= 4.0]
+    if len(df_significant) > 50000:
+        df_significant = df_significant.sample(n=50000, random_state=42)
+
+    scatter2 = ax2.scatter(df_significant['Longitude'], df_significant['Latitude'],
+                          c=df_significant['Magnitude'], cmap='plasma',
+                          alpha=0.6, s=df_significant['Magnitude']**2 * 2,
+                          edgecolors='black', linewidths=0.3)
+    cb = plt.colorbar(scatter2, ax=ax2, label='Magnitude')
+
+    ax2.set_xlabel('Longitude', fontsize=12)
+    ax2.set_ylabel('Latitude', fontsize=12)
+    ax2.set_title('Significant Earthquakes (M ≥ 4.0) - Size Scaled by Magnitude',
+                  fontsize=13, fontweight='bold')
+    ax2.set_xlim(-180, 180)
+    ax2.set_ylim(-90, 90)
+    ax2.grid(True, alpha=0.3, linestyle=':')
+
+    # Add annotations for major seismic zones
+    zones = [
+        (-120, 40, 'California'),
+        (-150, 60, 'Alaska'),
+        (140, 38, 'Japan'),
+        (120, -5, 'Indonesia'),
+        (-70, -35, 'Chile'),
+    ]
+    for lon, lat, name in zones:
+        ax2.annotate(name, xy=(lon, lat), fontsize=8, alpha=0.7,
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7))
+
+    plt.suptitle('Global Earthquake Distribution Analysis', fontsize=15, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}earthquake_locations.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}earthquake_locations.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}earthquake_locations.png")
@@ -1317,7 +1377,7 @@ def plot_earthquake_locations(df):
 
 def create_density_heatmap(df):
     """
-    Create heatmap showing earthquake density.
+    Create heatmap showing earthquake density with logarithmic scale.
 
     Parameters:
         df (pd.DataFrame): Input DataFrame
@@ -1327,21 +1387,51 @@ def create_density_heatmap(df):
     """
     print("\nCreating Earthquake Density Heatmap...")
 
-    fig, ax = plt.subplots(figsize=FIGSIZE_LARGE)
+    from matplotlib.colors import LogNorm
 
-    # Create 2D histogram
-    h = ax.hist2d(df['Longitude'], df['Latitude'],
-                  bins=[180, 90], cmap='hot_r',
-                  cmin=1)  # Minimum count to show
+    fig, axes = plt.subplots(1, 2, figsize=(18, 8))
 
-    plt.colorbar(h[3], ax=ax, label='Earthquake Count')
+    # Subplot 1: Global heatmap with log scale
+    ax1 = axes[0]
 
-    ax.set_xlabel('Longitude', fontsize=12)
-    ax.set_ylabel('Latitude', fontsize=12)
-    ax.set_title('Earthquake Density Heatmap', fontsize=14, fontweight='bold')
+    # Create 2D histogram with finer bins
+    h1 = ax1.hist2d(df['Longitude'], df['Latitude'],
+                    bins=[360, 180], cmap='YlOrRd',
+                    cmin=1, norm=LogNorm())  # Log scale for better visibility
 
+    cb1 = plt.colorbar(h1[3], ax=ax1, label='Earthquake Count (log scale)')
+
+    ax1.set_xlabel('Longitude', fontsize=12)
+    ax1.set_ylabel('Latitude', fontsize=12)
+    ax1.set_title('Global Earthquake Density (Log Scale)', fontsize=13, fontweight='bold')
+    ax1.set_xlim(-180, 180)
+    ax1.set_ylim(-90, 90)
+
+    # Add grid lines for major tectonic references
+    ax1.axhline(y=0, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax1.axvline(x=0, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax1.grid(True, alpha=0.3, linestyle=':')
+
+    # Subplot 2: Hexbin plot for smoother density visualization
+    ax2 = axes[1]
+
+    hb = ax2.hexbin(df['Longitude'], df['Latitude'],
+                    gridsize=100, cmap='inferno',
+                    mincnt=1, bins='log')  # Log binning
+
+    cb2 = plt.colorbar(hb, ax=ax2, label='Log(Earthquake Count)')
+
+    ax2.set_xlabel('Longitude', fontsize=12)
+    ax2.set_ylabel('Latitude', fontsize=12)
+    ax2.set_title('Earthquake Density Hexbin (Log Scale)', fontsize=13, fontweight='bold')
+    ax2.set_xlim(-180, 180)
+    ax2.set_ylim(-90, 90)
+    ax2.grid(True, alpha=0.3, linestyle=':')
+
+    plt.suptitle('Earthquake Density Analysis - Pacific Ring of Fire Visible',
+                 fontsize=15, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(f'{OUTPUT_DIR}earthquake_density.png', dpi=150, bbox_inches='tight')
+    plt.savefig(f'{OUTPUT_DIR}earthquake_density.png', dpi=200, bbox_inches='tight')
     plt.close()
 
     print(f"✓ Saved: {OUTPUT_DIR}earthquake_density.png")

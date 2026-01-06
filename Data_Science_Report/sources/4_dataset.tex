@@ -1,0 +1,123 @@
+% Dataset Section
+% Earthquake Prediction Problems - Data Science Report
+
+This section describes the earthquake dataset used in this study, including its source, structure, variables, and preprocessing steps.
+
+\subsection{Data Source}
+
+The dataset used in this study was obtained from the United States Geological Survey (USGS) Earthquake Hazards Program \cite{usgs2024}. The USGS maintains a comprehensive global seismic monitoring network and provides publicly accessible earthquake data through their Earthquake Catalog API. This catalog contains records of seismic events detected by the Global Seismographic Network and contributing regional networks worldwide.
+
+The USGS earthquake catalog is widely recognized as one of the most comprehensive and reliable sources of earthquake data, making it suitable for large-scale data science analysis. The data undergoes rigorous quality control procedures by USGS seismologists before publication, ensuring high reliability for research purposes.
+
+\subsection{Dataset Overview}
+
+The dataset covers a 23-year period from January 1, 2002 to December 17, 2025. This extended time range provides sufficient data for temporal pattern analysis and model training while ensuring that the data reflects modern seismic monitoring capabilities.
+
+\begin{table}[H]
+\centering
+\caption{Dataset summary statistics}
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Attribute} & \textbf{Value} \\
+\hline
+Total Records & 2,921,770 \\
+Total Variables & 28 \\
+Time Period & 2002 -- 2025 \\
+Memory Size & 2,187.36 MB \\
+Geographic Coverage & Global \\
+\hline
+\end{tabular}
+\end{table}
+
+The dataset contains nearly 3 million earthquake records, representing one of the largest publicly available compilations of seismic event data. This volume of data enables statistically robust analysis and provides sufficient examples for machine learning model training across different magnitude categories.
+
+\subsection{Variable Description}
+
+The dataset contains 28 variables organized into six categories: spatial coordinates, temporal information, seismic metrics, quality indicators, source information, and derived categories.
+
+\subsubsection{Spatial Coordinates}
+
+The spatial variables define the geographic location of each earthquake event. Latitude represents the north-south position of the earthquake epicenter, measured in decimal degrees ranging from -90 to 90. Longitude represents the east-west position, measured in decimal degrees ranging from -180 to 180. The place variable provides a human-readable description of the earthquake location, typically indicating distance and direction from the nearest populated area.
+
+\subsubsection{Temporal Information}
+
+Temporal variables capture when each earthquake occurred and when the record was last updated. The timestamp variable records the origin time of the earthquake in UTC format with millisecond precision. The updated variable indicates when the earthquake record was last revised by USGS. Additional derived temporal features include year, month, day, hour, day of week, and day of year, which facilitate temporal pattern analysis.
+
+\subsubsection{Seismic Metrics}
+
+The seismic metric variables describe the physical characteristics of each earthquake. Depth represents the vertical distance from the Earth's surface to the earthquake hypocenter, measured in kilometers. Values range from 0 to 735.8 km in this dataset, with shallow earthquakes (less than 70 km) being most common.
+
+Magnitude quantifies the size of the earthquake on a logarithmic scale. The dataset includes events ranging from magnitude -10.0 (very small, often mining-induced) to 9.1 (major catastrophic events). The mean magnitude is 1.72 with a standard deviation of 1.18.
+
+The magType variable indicates which magnitude scale was used to calculate the magnitude value. Common types include local magnitude (ml), body-wave magnitude (mb), surface-wave magnitude (ms), and moment magnitude (mw). Different magnitude types are appropriate for different earthquake sizes and distances.
+
+The energy variable represents the seismic energy released by the earthquake, calculated from magnitude using the standard formula $\log_{10}(E) = 1.5M + 4.8$ where E is energy in Joules and M is magnitude.
+
+\subsubsection{Quality Indicators}
+
+Quality indicator variables provide information about the reliability and precision of the earthquake location and magnitude estimates. The nst variable represents the number of seismic stations used to determine the earthquake location. Higher values generally indicate more reliable location estimates.
+
+The gap variable measures the largest azimuthal gap between adjacent stations, expressed in degrees. Smaller gap values indicate better station coverage and more reliable horizontal location estimates. Values less than 180 degrees generally indicate well-constrained locations.
+
+The rms variable represents the root-mean-square travel time residual, measuring the fit between observed and predicted arrival times. Lower values indicate better location solutions.
+
+The horizontalError and depthError variables quantify the uncertainty in the horizontal and vertical location estimates, respectively, measured in kilometers. These values help assess the reliability of individual event locations.
+
+The status variable indicates whether the event has been reviewed by a seismologist (reviewed) or was automatically processed (automatic).
+
+\subsubsection{Source Information}
+
+Source information variables identify the contributing seismic network and data sources. The net variable identifies the network that originally contributed the event to the catalog. The id variable provides a unique identifier for each earthquake record. The locationSource indicates which network provided the preferred location solution, while magSource indicates which network provided the preferred magnitude.
+
+The type variable classifies the seismic event. While most events are earthquakes, the dataset also includes a small percentage of explosions, quarry blasts, and other seismic events.
+
+\subsubsection{Derived Categories}
+
+Two categorical variables were derived from the original data to facilitate analysis. The magnitude\_category variable classifies earthquakes into five categories based on magnitude: Small (M $<$ 4.0), Moderate (4.0 $\leq$ M $<$ 5.0), Great (5.0 $\leq$ M $<$ 6.0), Strong (6.0 $\leq$ M $<$ 7.0), and Major (M $\geq$ 7.0).
+
+The depth\_category variable classifies earthquakes by depth following standard seismological conventions: Shallow (depth $<$ 70 km), Intermediate (70 km $\leq$ depth $<$ 300 km), and Deep (depth $\geq$ 300 km).
+
+\subsection{Data Quality}
+
+Overall data quality is high, with most critical variables having completeness rates exceeding 93\%. Table \ref{tab:missing} summarizes the missing value rates for variables with incomplete data.
+
+\begin{table}[H]
+\centering
+\caption{Variables with missing values}
+\label{tab:missing}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Variable} & \textbf{Missing Count} & \textbf{Missing Rate} \\
+\hline
+depthError & 210,367 & 7.2\% \\
+rms & 113,953 & 3.9\% \\
+magType & 46,750 & 1.6\% \\
+Magnitude & 35,086 & 1.2\% \\
+energy & 35,086 & 1.2\% \\
+\hline
+\end{tabular}
+\end{table}
+
+Missing depth errors are primarily associated with poorly constrained earthquake locations, particularly for small events recorded by few stations. Missing magnitude values represent events where magnitude could not be reliably determined, often due to signal quality issues or station availability.
+
+\subsection{Data Preprocessing}
+
+Several preprocessing steps were applied to prepare the data for analysis. First, temporal features were extracted from the timestamp variable, including year, month, day, hour, day of week, and day of year. These features enable analysis of temporal patterns at multiple scales.
+
+Second, the energy variable was calculated from magnitude using the standard seismological formula. Third, categorical variables (magnitude\_category and depth\_category) were derived from continuous variables to facilitate grouped analysis and classification tasks.
+
+Fourth, data validation was performed to identify potential errors. This included checking that latitude values fall within the range -90 to 90, longitude values fall within -180 to 180, depth values are non-negative, and magnitude values are within physically plausible ranges.
+
+No records were removed during preprocessing, as apparent outliers (such as negative magnitudes or very deep earthquakes) represent valid physical phenomena. Missing values were retained rather than imputed, allowing analysis methods to handle them appropriately based on the specific requirements of each analysis.
+
+\subsection{Data Limitations}
+
+Several limitations of the dataset should be acknowledged. First, detection capability varies by location and time. Seismic monitoring networks are denser in developed regions, particularly the United States, Japan, and Europe. This results in more complete detection of small earthquakes in these areas compared to remote oceanic regions or developing countries.
+
+Second, the detection threshold has improved over time as monitoring networks have expanded. The apparent increase in earthquake counts over the study period primarily reflects improved detection rather than actual increases in seismicity. This temporal non-stationarity must be considered when interpreting temporal trends.
+
+Third, magnitude estimates for historical events may be revised as additional data becomes available or analysis methods improve. The dataset reflects the most current estimates at the time of data extraction.
+
+Fourth, very small earthquakes (magnitude less than 2.0) are detected inconsistently depending on network density and local noise conditions. Analysis focusing on these small events should account for detection biases.
+
+Despite these limitations, the USGS earthquake catalog remains one of the most comprehensive and well-documented sources of global seismic data, making it highly suitable for data science research and machine learning applications.
